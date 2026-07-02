@@ -139,6 +139,13 @@ export function DataProvider({ children }) {
       options: { emailRedirectTo: window.location.origin },
     });
   }
+  async function signInWithGoogle() {
+    if (!isConfigured) return { error: null };
+    return supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: window.location.origin },
+    });
+  }
   async function signOut() {
     if (isConfigured) await supabase.auth.signOut();
   }
@@ -147,7 +154,7 @@ export function DataProvider({ children }) {
     ready, session, isConfigured,
     settings, members, tasks, vendors, budgetItems, guests,
     addRow, updateRow, deleteRow, addManyGuests, updateSettings,
-    signIn, signOut,
+    signIn, signInWithGoogle, signOut,
   };
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
 }
