@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useData } from "../context/DataContext.jsx";
+import Logo from "./Logo.jsx";
 
 export default function AuthGate() {
   const { signIn } = useData();
@@ -21,7 +22,8 @@ export default function AuthGate() {
   return (
     <div className="auth">
       <div className="auth-card">
-        <p className="eyebrow">Kragujevac · September</p>
+        <Logo size={56} />
+        <p className="eyebrow" style={{ marginTop: 14 }}>Kragujevac · September</p>
         <h1>Wedding OS</h1>
         {sent ? (
           <p className="auth-msg">
