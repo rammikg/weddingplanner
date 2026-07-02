@@ -23,8 +23,8 @@ export default function AuthGate() {
     <div className="auth">
       <div className="auth-card">
         <Logo size={56} />
-        <p className="eyebrow" style={{ marginTop: 14 }}>Kragujevac · September</p>
-        <h1>Wedding OS</h1>
+        <p className="eyebrow" style={{ marginTop: 14 }}>LAVA YOU</p>
+        <h1>A+B Wedding ❤️</h1>
         {sent ? (
           <p className="auth-msg">
             Check your inbox — we sent a sign-in link to <b>{email}</b>. Open it
