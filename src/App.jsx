@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
 import { DataProvider, useData } from "./context/DataContext.jsx";
+import { LangProvider } from "./context/LangContext.jsx";
 import AuthGate from "./components/AuthGate.jsx";
 import BottomNav from "./components/BottomNav.jsx";
 import Countdown from "./components/Countdown.jsx";
@@ -42,10 +43,12 @@ function Root() {
 
 export default function App() {
   return (
-    <DataProvider>
-      <BrowserRouter>
-        <Root />
-      </BrowserRouter>
-    </DataProvider>
+    <LangProvider>
+      <DataProvider>
+        <BrowserRouter>
+          <Root />
+        </BrowserRouter>
+      </DataProvider>
+    </LangProvider>
   );
 }

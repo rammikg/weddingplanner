@@ -1,7 +1,9 @@
 import { useData } from "../context/DataContext.jsx";
+import { useLang } from "../context/LangContext.jsx";
 
 export default function Countdown() {
   const { settings } = useData();
+  const { t } = useLang();
   const date = settings?.wedding_date;
   if (!date) return null;
 
@@ -12,10 +14,10 @@ export default function Countdown() {
   const days = Math.round((d - today) / 86400000);
 
   let text;
-  if (days > 1) text = `${days} days to go`;
-  else if (days === 1) text = "Tomorrow! 🎉";
-  else if (days === 0) text = "Today! 🎉";
-  else text = `Married ${Math.abs(days)} ${Math.abs(days) === 1 ? "day" : "days"} ago 🎉`;
+  if (days > 1) text = t("cd_days", { n: days });
+  else if (days === 1) text = t("cd_tomorrow");
+  else if (days === 0) text = t("cd_today");
+  else text = t("cd_married", { n: Math.abs(days) });
 
   const nice = d.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
 

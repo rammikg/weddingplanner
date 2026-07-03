@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useData } from "../context/DataContext.jsx";
+import { useLang } from "../context/LangContext.jsx";
 import { VENDOR_CATEGORIES, VENDOR_PIPELINE, money } from "../lib/constants.js";
 import Modal from "../components/Modal.jsx";
 import { Text, Area, Num, Select, Toggle } from "../components/Fields.jsx";
@@ -9,17 +10,17 @@ const emptyVendor = {
   email: "", quote: 0, deposit_required: 0, deposit_paid: false,
   contract_url: "", notes: "",
 };
-
-const catLabel = (k) => VENDOR_CATEGORIES.find((c) => c.key === k)?.label || k;
 const balance = (v) => Number(v.quote || 0) - (v.deposit_paid ? Number(v.deposit_required || 0) : 0);
 
 export default function Vendors() {
   const { vendors, settings, addRow, updateRow, deleteRow } = useData();
+  const { t } = useLang();
   const [editing, setEditing] = useState(null);
   const [draft, setDraft] = useState(emptyVendor);
   const [filters, setFilters] = useState({ status: "", q: "" });
   const cur = settings?.currency || "EUR";
   const rate = settings?.eur_czk_rate || 25;
+  const fmt = (v) => money(v, cur, rate);
 
   const filtered = useMemo(() => vendors.filter((v) => {
     if (filters.status && v.status !== filters.status) return false;
@@ -27,13 +28,10 @@ export default function Vendors() {
     return true;
   }), [vendors, filters]);
 
-  // group by category (only categories that have matching vendors)
   const groups = useMemo(() => {
     const map = {};
     for (const v of filtered) (map[v.category] || (map[v.category] = [])).push(v);
-    return VENDOR_CATEGORIES
-      .filter((c) => map[c.key]?.length)
-      .map((c) => ({ ...c, items: map[c.key] }));
+    return VENDOR_CATEGORIES.filter((c) => map[c.key]?.length).map((c) => ({ ...c, items: map[c.key] }));
   }, [filtered]);
 
   const totalOutstanding = useMemo(
@@ -55,43 +53,43 @@ export default function Vendors() {
     <>
       <header className="page-head">
         <div>
-          <p className="eyebrow">Suppliers</p>
-          <h1>Vendors</h1>
+          <p className="eyebrow">{t("eyebrow_suppliers")}</p>
+          <h1>{t("title_vendors")}</h1>
         </div>
-        <button className="btn" onClick={openNew}>+ Vendor</button>
+        <button className="btn" onClick={openNew}>{t("btn_vendor")}</button>
       </header>
 
       <div className="stat-row three">
         <div className="stat">
-          <span className="stat-label">Vendors</span>
+          <span className="stat-label">{t("stat_vendors")}</span>
           <span className="stat-val">{vendors.length}</span>
         </div>
         <div className="stat">
-          <span className="stat-label">Deposits paid</span>
-          <span className="stat-val">{money(totalPaid, cur, rate)}</span>
+          <span className="stat-label">{t("stat_deposits_paid")}</span>
+          <span className="stat-val">{fmt(totalPaid)}</span>
         </div>
         <div className="stat">
-          <span className="stat-label">Outstanding</span>
-          <span className="stat-val">{money(totalOutstanding, cur, rate)}</span>
+          <span className="stat-label">{t("stat_outstanding")}</span>
+          <span className="stat-val">{fmt(totalOutstanding)}</span>
         </div>
       </div>
 
       <div className="filters">
-        <input className="input filter-search" placeholder="Search vendors…"
+        <input className="input filter-search" placeholder={t("search_vendors")}
           value={filters.q} onChange={(e) => setFilters((f) => ({ ...f, q: e.target.value }))} />
         <select className="input" value={filters.status}
           onChange={(e) => setFilters((f) => ({ ...f, status: e.target.value }))}>
-          <option value="">Any stage</option>
-          {VENDOR_PIPELINE.map((s) => <option key={s} value={s}>{s}</option>)}
+          <option value="">{t("any_stage")}</option>
+          {VENDOR_PIPELINE.map((s) => <option key={s} value={s}>{t(`stage_${s}`)}</option>)}
         </select>
       </div>
 
-      {groups.length === 0 && <p className="empty">No vendors yet. Add your first with “+ Vendor”.</p>}
+      {groups.length === 0 && <p className="empty">{t("no_vendors")}</p>}
 
       {groups.map((g) => (
         <details className="cat-drop" key={g.key}>
           <summary>
-            <span className="cat-drop-name">{g.label}</span>
+            <span className="cat-drop-name">{t(`vcat_${g.key}`)}</span>
             <span className="count">{g.items.length}</span>
           </summary>
           <div className="cat-drop-body">
@@ -99,15 +97,15 @@ export default function Vendors() {
               <article className="vendor-card" key={v.id} onClick={() => openEdit(v)}>
                 <div className="vendor-top">
                   <span className="vendor-name">{v.name}</span>
-                  <span className={`pill stage-${v.status}`}>{v.status}</span>
+                  <span className={`pill stage-${v.status}`}>{t(`stage_${v.status}`)}</span>
                 </div>
                 <div className="vendor-money">
-                  <span>Price <b>{money(v.quote, cur, rate)}</b></span>
+                  <span>{t("v_price")} <b>{fmt(v.quote)}</b></span>
                   <span className={`${balance(v) > 0 ? "over" : "ok-text"}`}>
-                    Balance <b>{money(balance(v), cur, rate)}</b>
+                    {t("v_balance")} <b>{fmt(balance(v))}</b>
                   </span>
                   <span className={`pill ${v.deposit_paid ? "ok" : "warn"}`}>
-                    {v.deposit_paid ? "deposit paid" : "deposit due"}
+                    {v.deposit_paid ? t("deposit_paid_pill") : t("deposit_due_pill")}
                   </span>
                 </div>
               </article>
@@ -117,30 +115,31 @@ export default function Vendors() {
       ))}
 
       {editing && (
-        <Modal title={editing.id ? "Edit vendor" : "New vendor"}
+        <Modal title={editing.id ? t("edit_vendor") : t("new_vendor")}
           onClose={() => setEditing(null)} onSave={save} onDelete={editing.id ? remove : null}>
-          <Text label="Name" value={draft.name} onChange={(v) => setDraft({ ...draft, name: v })} />
+          <Text label={t("f_name")} value={draft.name} onChange={(v) => setDraft({ ...draft, name: v })} />
           <div className="grid-2">
-            <Select label="Type" value={draft.category}
+            <Select label={t("f_type")} value={draft.category}
               onChange={(v) => setDraft({ ...draft, category: v })}
-              options={VENDOR_CATEGORIES.map((c) => ({ value: c.key, label: c.label }))} />
-            <Select label="Stage" value={draft.status}
-              onChange={(v) => setDraft({ ...draft, status: v })} options={VENDOR_PIPELINE} />
-            <Text label="Contact name" value={draft.contact_name} onChange={(v) => setDraft({ ...draft, contact_name: v })} />
-            <Text label="Phone" value={draft.phone} onChange={(v) => setDraft({ ...draft, phone: v })} />
+              options={VENDOR_CATEGORIES.map((c) => ({ value: c.key, label: t(`vcat_${c.key}`) }))} />
+            <Select label={t("f_stage")} value={draft.status}
+              onChange={(v) => setDraft({ ...draft, status: v })}
+              options={VENDOR_PIPELINE.map((s) => ({ value: s, label: t(`stage_${s}`) }))} />
+            <Text label={t("f_contact_name")} value={draft.contact_name} onChange={(v) => setDraft({ ...draft, contact_name: v })} />
+            <Text label={t("f_phone")} value={draft.phone} onChange={(v) => setDraft({ ...draft, phone: v })} />
           </div>
-          <Text label="Email" value={draft.email} onChange={(v) => setDraft({ ...draft, email: v })} />
+          <Text label={t("f_email")} value={draft.email} onChange={(v) => setDraft({ ...draft, email: v })} />
           <div className="grid-2">
-            <Num label="Their price / quote (EUR)" value={draft.quote} onChange={(v) => setDraft({ ...draft, quote: v })} />
-            <Num label="Deposit required (EUR)" value={draft.deposit_required} onChange={(v) => setDraft({ ...draft, deposit_required: v })} />
+            <Num label={t("f_price_quote")} value={draft.quote} onChange={(v) => setDraft({ ...draft, quote: v })} />
+            <Num label={t("f_deposit_required")} value={draft.deposit_required} onChange={(v) => setDraft({ ...draft, deposit_required: v })} />
           </div>
-          <Toggle label="Deposit paid" value={draft.deposit_paid} onChange={(v) => setDraft({ ...draft, deposit_paid: v })} />
+          <Toggle label={t("f_deposit_paid")} value={draft.deposit_paid} onChange={(v) => setDraft({ ...draft, deposit_paid: v })} />
           <div className="balance-note">
-            Remaining balance: <b>{money(balance(draft), cur, rate)}</b>
-            <span className="balance-hint"> · “price” = what they charge, not what you’ve paid</span>
+            {t("remaining_balance")}: <b>{fmt(balance(draft))}</b>
+            <span className="balance-hint"> · {t("balance_hint")}</span>
           </div>
-          <Text label="Contract link (URL)" value={draft.contract_url} onChange={(v) => setDraft({ ...draft, contract_url: v })} />
-          <Area label="Notes / log" value={draft.notes} onChange={(v) => setDraft({ ...draft, notes: v })} />
+          <Text label={t("f_contract")} value={draft.contract_url} onChange={(v) => setDraft({ ...draft, contract_url: v })} />
+          <Area label={t("f_notes_log")} value={draft.notes} onChange={(v) => setDraft({ ...draft, notes: v })} />
         </Modal>
       )}
     </>

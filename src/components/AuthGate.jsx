@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useData } from "../context/DataContext.jsx";
+import { useLang } from "../context/LangContext.jsx";
 import Logo from "./Logo.jsx";
 
 function GoogleIcon() {
@@ -15,6 +16,7 @@ function GoogleIcon() {
 
 export default function AuthGate() {
   const { signIn, signInWithGoogle } = useData();
+  const { t } = useLang();
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
   const [err, setErr] = useState("");
@@ -25,7 +27,6 @@ export default function AuthGate() {
     setErr("");
     const { error } = await signInWithGoogle();
     if (error) setErr(error.message);
-    // on success the browser redirects to Google, then back signed in
   }
 
   async function submit() {
@@ -46,36 +47,33 @@ export default function AuthGate() {
         <h1>A+B Wedding ❤️</h1>
 
         {sent ? (
-          <p className="auth-msg">
-            Check your inbox — we sent a sign-in link to <b>{email}</b>. Open it
-            on this device to continue.
-          </p>
+          <p className="auth-msg">{t("auth_check", { email })}</p>
         ) : (
           <>
-            <p className="auth-msg">Sign in to open your wedding board.</p>
+            <p className="auth-msg">{t("auth_prompt")}</p>
 
             <button className="btn btn-block btn-google" onClick={google}>
               <GoogleIcon />
-              <span>Continue with Google</span>
+              <span>{t("auth_google")}</span>
             </button>
 
             {!showEmail ? (
               <button className="auth-alt" onClick={() => setShowEmail(true)}>
-                or sign in with email instead
+                {t("auth_or_email")}
               </button>
             ) : (
               <>
-                <div className="auth-divider"><span>or email</span></div>
+                <div className="auth-divider"><span>{t("auth_or_divider")}</span></div>
                 <input
                   className="input"
                   type="email"
-                  placeholder="you@email.com"
+                  placeholder={t("auth_email_ph")}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && submit()}
                 />
                 <button className="btn btn-block" onClick={submit} disabled={busy}>
-                  {busy ? "Sending…" : "Send link"}
+                  {busy ? t("auth_sending") : t("auth_send")}
                 </button>
               </>
             )}
