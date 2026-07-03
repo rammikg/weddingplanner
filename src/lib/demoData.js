@@ -12,7 +12,7 @@ export const demoMembers = [
   { id: uid("m"), name: "Mom", role_label: "Family" },
 ];
 
-export const demoSettings = { id: 1, total_budget: 15000, currency: "EUR" };
+export const demoSettings = { id: 1, total_budget: 15000, currency: "EUR", eur_czk_rate: 25, wedding_date: null };
 
 let p = 0;
 const task = (title, status, priority, category, due, assignee, description = "") => ({

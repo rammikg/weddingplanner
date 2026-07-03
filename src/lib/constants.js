@@ -49,18 +49,25 @@ export const RSVP_STATES = [
 // Cycle order used by tap-to-change pills.
 export const RSVP_CYCLE = ["none", "confirmed", "tentative", "declined"];
 
-export function money(n, currency = "EUR") {
-  const v = Number(n || 0);
+// Amounts are stored in EUR (base). money() converts to the display currency.
+export function money(eur, currency = "EUR", rate = 25) {
+  const v = Number(eur || 0);
+  if (currency === "CZK") {
+    const czk = v * (Number(rate) || 25);
+    try {
+      return new Intl.NumberFormat("cs-CZ", {
+        style: "currency", currency: "CZK", maximumFractionDigits: 0,
+      }).format(czk);
+    } catch { return `${Math.round(czk)} Kč`; }
+  }
   try {
     return new Intl.NumberFormat("en-IE", {
-      style: "currency",
-      currency,
-      maximumFractionDigits: 0,
+      style: "currency", currency: "EUR", maximumFractionDigits: 0,
     }).format(v);
-  } catch {
-    return `${currency} ${v.toFixed(0)}`;
-  }
+  } catch { return `€${v.toFixed(0)}`; }
 }
+
+export const PRIORITY_ORDER = { high: 0, medium: 1, low: 2 };
 
 export function isOverdue(due_date, status) {
   if (!due_date || status === "done") return false;

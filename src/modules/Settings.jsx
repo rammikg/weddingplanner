@@ -5,6 +5,7 @@ export default function Settings() {
   const { settings, members, updateSettings, addRow, updateRow, deleteRow, session, signOut, isConfigured } = useData();
   const [name, setName] = useState("");
   const [role, setRole] = useState("");
+  const currency = settings?.currency || "EUR";
 
   function addMember() {
     if (!name.trim()) return;
@@ -29,19 +30,43 @@ export default function Settings() {
       )}
 
       <section className="settings-block">
-        <h2>Budget</h2>
+        <h2>Wedding day</h2>
+        <p className="hint">Set the date and a countdown shows on top of every tab.</p>
+        <label className="field">
+          <span className="field-label">Date</span>
+          <input className="input" type="date" value={settings?.wedding_date || ""}
+            onChange={(e) => updateSettings({ wedding_date: e.target.value || null })} />
+        </label>
+      </section>
+
+      <section className="settings-block">
+        <h2>Budget & currency</h2>
         <div className="grid-2">
           <label className="field">
-            <span className="field-label">Total budget</span>
+            <span className="field-label">Total budget (entered in EUR)</span>
             <input className="input" type="number" value={settings?.total_budget || 0}
               onChange={(e) => updateSettings({ total_budget: Number(e.target.value || 0) })} />
           </label>
           <label className="field">
-            <span className="field-label">Currency</span>
-            <input className="input" value={settings?.currency || "EUR"}
-              onChange={(e) => updateSettings({ currency: e.target.value.toUpperCase().slice(0, 3) })} />
+            <span className="field-label">Display currency</span>
+            <select className="input" value={currency}
+              onChange={(e) => updateSettings({ currency: e.target.value })}>
+              <option value="EUR">EUR (€)</option>
+              <option value="CZK">CZK (Kč)</option>
+            </select>
           </label>
         </div>
+        {currency === "CZK" && (
+          <label className="field">
+            <span className="field-label">Exchange rate — 1 EUR = ? CZK (approximate)</span>
+            <input className="input" type="number" step="0.1" value={settings?.eur_czk_rate || 25}
+              onChange={(e) => updateSettings({ eur_czk_rate: Number(e.target.value || 25) })} />
+          </label>
+        )}
+        <p className="hint">
+          You enter amounts in EUR everywhere. Switching to CZK converts the view using this rate —
+          it doesn’t change what’s stored.
+        </p>
       </section>
 
       <section className="settings-block">

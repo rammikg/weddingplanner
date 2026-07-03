@@ -7,6 +7,8 @@ create table if not exists settings (
   id int primary key default 1,
   total_budget numeric not null default 15000,
   currency text not null default 'EUR',
+  eur_czk_rate numeric default 25,
+  wedding_date date,
   constraint settings_singleton check (id = 1)
 );
 

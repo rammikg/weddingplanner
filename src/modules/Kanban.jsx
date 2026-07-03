@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { useData } from "../context/DataContext.jsx";
 import {
-  KANBAN_COLUMNS, TASK_CATEGORIES, PRIORITIES, isOverdue,
+  KANBAN_COLUMNS, TASK_CATEGORIES, PRIORITIES, PRIORITY_ORDER, isOverdue,
 } from "../lib/constants.js";
 import Modal from "../components/Modal.jsx";
 import { Text, Area, Select, DateField } from "../components/Fields.jsx";
@@ -12,11 +12,19 @@ const emptyTask = {
   assignee_id: null, status: "todo", due_date: null,
 };
 
+const SORTS = [
+  { key: "due", label: "Due date" },
+  { key: "priority", label: "Priority" },
+  { key: "category", label: "Category" },
+  { key: "assignee", label: "Assignee" },
+];
+
 export default function Kanban() {
   const { tasks, members, addRow, updateRow, deleteRow } = useData();
-  const [editing, setEditing] = useState(null); // task object or null
+  const [editing, setEditing] = useState(null);
   const [draft, setDraft] = useState(emptyTask);
   const [filters, setFilters] = useState({ category: "", assignee: "", priority: "", q: "" });
+  const [sortBy, setSortBy] = useState("due");
 
   const memberName = (id) => members.find((m) => m.id === id)?.name || "";
 
@@ -31,28 +39,32 @@ export default function Kanban() {
     });
   }, [tasks, filters]);
 
+  const sortFn = useMemo(() => {
+    const byPos = (a, b) => (a.position || 0) - (b.position || 0);
+    if (sortBy === "priority")
+      return (a, b) => (PRIORITY_ORDER[a.priority] ?? 9) - (PRIORITY_ORDER[b.priority] ?? 9) || byPos(a, b);
+    if (sortBy === "category")
+      return (a, b) => (a.category || "").localeCompare(b.category || "") || byPos(a, b);
+    if (sortBy === "assignee")
+      return (a, b) => memberName(a.assignee_id).localeCompare(memberName(b.assignee_id)) || byPos(a, b);
+    // default: due date (nulls last), then position
+    return (a, b) => {
+      const ad = a.due_date || "9999-12-31";
+      const bd = b.due_date || "9999-12-31";
+      return ad !== bd ? (ad < bd ? -1 : 1) : byPos(a, b);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sortBy, members]);
+
   const byColumn = useMemo(() => {
     const map = Object.fromEntries(KANBAN_COLUMNS.map((c) => [c.key, []]));
     for (const t of filtered) (map[t.status] || map.todo).push(t);
-    for (const k of Object.keys(map)) {
-      map[k].sort((a, b) => {
-        const ad = a.due_date || "9999-12-31";
-        const bd = b.due_date || "9999-12-31";
-        if (ad !== bd) return ad < bd ? -1 : 1;
-        return (a.position || 0) - (b.position || 0);
-      });
-    }
+    for (const k of Object.keys(map)) map[k].sort(sortFn);
     return map;
-  }, [filtered]);
+  }, [filtered, sortFn]);
 
-  function openNew(status = "todo") {
-    setDraft({ ...emptyTask, status });
-    setEditing({});
-  }
-  function openEdit(task) {
-    setDraft({ ...task });
-    setEditing(task);
-  }
+  function openNew(status = "todo") { setDraft({ ...emptyTask, status }); setEditing({}); }
+  function openEdit(task) { setDraft({ ...task }); setEditing(task); }
   function save() {
     if (!draft.title.trim()) return;
     if (editing && editing.id) updateRow("tasks", editing.id, draft);
@@ -62,16 +74,12 @@ export default function Kanban() {
     }
     setEditing(null);
   }
-  function remove() {
-    if (editing?.id) deleteRow("tasks", editing.id);
-    setEditing(null);
-  }
+  function remove() { if (editing?.id) deleteRow("tasks", editing.id); setEditing(null); }
 
   function onDragEnd(result) {
     const { destination, source, draggableId } = result;
     if (!destination) return;
-    if (destination.droppableId === source.droppableId && destination.index === source.index)
-      return;
+    if (destination.droppableId === source.droppableId && destination.index === source.index) return;
     const newStatus = destination.droppableId;
     const target = byColumn[newStatus].filter((t) => t.id !== draggableId);
     const before = target[destination.index - 1];
@@ -93,12 +101,8 @@ export default function Kanban() {
       </header>
 
       <div className="filters">
-        <input
-          className="input filter-search"
-          placeholder="Search tasks…"
-          value={filters.q}
-          onChange={(e) => setFilters((f) => ({ ...f, q: e.target.value }))}
-        />
+        <input className="input filter-search" placeholder="Search tasks…"
+          value={filters.q} onChange={(e) => setFilters((f) => ({ ...f, q: e.target.value }))} />
         <select className="input" value={filters.category}
           onChange={(e) => setFilters((f) => ({ ...f, category: e.target.value }))}>
           <option value="">All categories</option>
@@ -113,6 +117,10 @@ export default function Kanban() {
           onChange={(e) => setFilters((f) => ({ ...f, priority: e.target.value }))}>
           <option value="">Any priority</option>
           {PRIORITIES.map((p) => <option key={p} value={p}>{p}</option>)}
+        </select>
+        <select className="input sort-select" value={sortBy}
+          onChange={(e) => setSortBy(e.target.value)}>
+          {SORTS.map((s) => <option key={s.key} value={s.key}>Sort: {s.label}</option>)}
         </select>
       </div>
 
@@ -130,11 +138,9 @@ export default function Kanban() {
                   {byColumn[col.key].map((task, i) => (
                     <Draggable draggableId={task.id} index={i} key={task.id}>
                       {(dp, ds) => (
-                        <article
-                          className={`card ${ds.isDragging ? "dragging" : ""}`}
+                        <article className={`card ${ds.isDragging ? "dragging" : ""}`}
                           ref={dp.innerRef} {...dp.draggableProps} {...dp.dragHandleProps}
-                          onClick={() => openEdit(task)}
-                        >
+                          onClick={() => openEdit(task)}>
                           <div className="card-top">
                             <span className={`pill prio-${task.priority}`}>{task.priority}</span>
                             {task.category && <span className="tag">{task.category}</span>}
@@ -162,12 +168,8 @@ export default function Kanban() {
       </DragDropContext>
 
       {editing && (
-        <Modal
-          title={editing.id ? "Edit task" : "New task"}
-          onClose={() => setEditing(null)}
-          onSave={save}
-          onDelete={editing.id ? remove : null}
-        >
+        <Modal title={editing.id ? "Edit task" : "New task"}
+          onClose={() => setEditing(null)} onSave={save} onDelete={editing.id ? remove : null}>
           <Text label="Title" value={draft.title} onChange={(v) => setDraft({ ...draft, title: v })} />
           <Area label="Description" value={draft.description} onChange={(v) => setDraft({ ...draft, description: v })} />
           <div className="grid-2">
