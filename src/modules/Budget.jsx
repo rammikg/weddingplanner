@@ -88,7 +88,7 @@ export default function Budget() {
         </div>
         <div className="stat">
           <span className="stat-label">{t("stat_paid")}</span>
-          <span className="stat-val">{fmt(totals.paid)}</span>
+          <span className="stat-val">{fmt(totals.paid + vendorSummary.depositsPaid)}</span>
         </div>
       </div>
 

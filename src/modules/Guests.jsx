@@ -108,8 +108,8 @@ export default function Guests() {
         </div>
         <div className="tally-line small">
           <span>{t("plus_ones")} {tally.plusOnes}</span>
-          <span>{t("kids_chair")} {tally.kidsChair}</span>
           <span>{t("kids_lap")} {tally.lapKids}</span>
+          <span>{t("kids_chair")} {tally.kidsChair}</span>
         </div>
         <div className="tally-sides">
           {SIDES.map((s) => (
@@ -159,8 +159,8 @@ export default function Guests() {
               <span className="guest-sub">
                 {t(`side_${g.side}`)}
                 {g.plus_one ? ` · +${g.plus_one}` : ""}
-                {g.kids_chair ? ` · ${g.kids_chair}🪑` : ""}
-                {g.kids_lap ? ` · ${g.kids_lap}👶` : ""}
+                {g.kids_lap ? ` · ${g.kids_lap}×0–7` : ""}
+                {g.kids_chair ? ` · ${g.kids_chair}×8+` : ""}
                 {g.accommodation_needed ? " · 🏨" : ""}
                 {g.transport_needed ? " · 🚐" : ""}
               </span>
@@ -181,8 +181,8 @@ export default function Guests() {
               options={RSVP_STATES.map((r) => ({ value: r.key, label: t(`rsvp_${r.key}`) }))} />
             <Text label={t("f_country")} value={draft.country} onChange={(v) => setDraft({ ...draft, country: v })} />
             <Num label={t("f_plus_ones")} value={draft.plus_one} onChange={(v) => setDraft({ ...draft, plus_one: v })} />
-            <Num label={t("f_kids_chair")} value={draft.kids_chair} onChange={(v) => setDraft({ ...draft, kids_chair: v })} />
             <Num label={t("f_kids_lap")} value={draft.kids_lap} onChange={(v) => setDraft({ ...draft, kids_lap: v })} />
+            <Num label={t("f_kids_chair")} value={draft.kids_chair} onChange={(v) => setDraft({ ...draft, kids_chair: v })} />
           </div>
           <Text label={t("f_dietary")} value={draft.dietary} onChange={(v) => setDraft({ ...draft, dietary: v })} />
           <div className="grid-2">

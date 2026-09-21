@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useData } from "../context/DataContext.jsx";
 import { useLang } from "../context/LangContext.jsx";
 import { LANGS } from "../lib/i18n.js";
+import { Num } from "../components/Fields.jsx";
 
 export default function Settings() {
   const { settings, members, updateSettings, addRow, updateRow, deleteRow, session, signOut, isConfigured } = useData();
@@ -50,11 +51,8 @@ export default function Settings() {
       <section className="settings-block">
         <h2>{t("set_budget_currency")}</h2>
         <div className="grid-2">
-          <label className="field">
-            <span className="field-label">{t("f_total_budget_eur")}</span>
-            <input className="input" type="number" value={settings?.total_budget || 0}
-              onChange={(e) => updateSettings({ total_budget: Number(e.target.value || 0) })} />
-          </label>
+          <Num label={t("f_total_budget_eur")} value={settings?.total_budget || 0}
+            onChange={(v) => updateSettings({ total_budget: v })} />
           <label className="field">
             <span className="field-label">{t("f_display_currency")}</span>
             <select className="input" value={currency}
@@ -65,11 +63,8 @@ export default function Settings() {
           </label>
         </div>
         {currency === "CZK" && (
-          <label className="field">
-            <span className="field-label">{t("f_exchange_rate")}</span>
-            <input className="input" type="number" step="0.1" value={settings?.eur_czk_rate || 25}
-              onChange={(e) => updateSettings({ eur_czk_rate: Number(e.target.value || 25) })} />
-          </label>
+          <Num label={t("f_exchange_rate")} value={settings?.eur_czk_rate || 25}
+            onChange={(v) => updateSettings({ eur_czk_rate: v })} />
         )}
         <p className="hint">{t("currency_note")}</p>
       </section>
