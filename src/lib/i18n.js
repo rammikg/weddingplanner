@@ -59,13 +59,13 @@ const EN = {
 
   paid_headcount: "paid headcount", total_bodies: "total bodies",
   rsvp_confirmed: "Confirmed", rsvp_tentative: "Tentative", rsvp_declined: "Declined", rsvp_none: "No response",
-  plus_ones: "Plus-ones", kids_chair: "Kids w/ chair", kids_lap: "Kids on lap",
+  plus_ones: "Plus-ones", kids_chair: "Kids 8+", kids_lap: "Kids 0–7",
   side_confirmed: "{c} confirmed / {i} invited", paid_seats: "paid seats",
   side_Serbian: "Serbian", side_Kazakh: "Kazakh", side_Czech: "Czech",
   needs_hotel: "Needs hotel", needs_transport: "Needs transport",
   shown_total: "{shown} shown · {total} total",
   f_side: "Side", f_rsvp: "RSVP", f_country: "Country", f_plus_ones: "Plus-ones",
-  f_kids_chair: "Kids w/ chair (5+)", f_kids_lap: "Kids on lap (under 5)", f_dietary: "Dietary",
+  f_kids_chair: "Kids 8+ (paid)", f_kids_lap: "Kids 0–7 (free)", f_dietary: "Dietary",
   f_needs_accommodation: "Needs accommodation", f_needs_transport: "Needs transport", f_notes: "Notes",
   new_guest: "New guest", edit_guest: "Edit guest",
 
@@ -150,13 +150,13 @@ const RU = {
 
   paid_headcount: "оплачиваемых гостей", total_bodies: "всего человек",
   rsvp_confirmed: "Подтвердили", rsvp_tentative: "Под вопросом", rsvp_declined: "Отказались", rsvp_none: "Нет ответа",
-  plus_ones: "Сопровождающие", kids_chair: "Дети (место)", kids_lap: "Дети (на руках)",
+  plus_ones: "Сопровождающие", kids_chair: "Дети 8+", kids_lap: "Дети 0–7",
   side_confirmed: "{c} подтвердили / {i} приглашено", paid_seats: "оплач. мест",
   side_Serbian: "Сербы", side_Kazakh: "Казахи", side_Czech: "Чехи",
   needs_hotel: "Нужен отель", needs_transport: "Нужен трансфер",
   shown_total: "{shown} показано · {total} всего",
   f_side: "Сторона", f_rsvp: "Ответ (RSVP)", f_country: "Страна", f_plus_ones: "Сопровождающие",
-  f_kids_chair: "Дети с местом (5+)", f_kids_lap: "Дети на руках (до 5)", f_dietary: "Питание/аллергии",
+  f_kids_chair: "Дети 8+ (платно)", f_kids_lap: "Дети 0–7 (бесплатно)", f_dietary: "Питание/аллергии",
   f_needs_accommodation: "Нужно жильё", f_needs_transport: "Нужен трансфер", f_notes: "Заметки",
   new_guest: "Новый гость", edit_guest: "Редактировать гостя",
 
